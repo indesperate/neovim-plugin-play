@@ -1,7 +1,7 @@
 local M = {}
 
-M.parse_buffer = function()
-	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+local parse_lines = function(start_pos, end_pos)
+	local lines = vim.api.nvim_buf_get_lines(0, start_pos, end_pos, false)
 	local quckfix_list = {}
 
 	for _, line in ipairs(lines) do
@@ -24,6 +24,19 @@ M.parse_buffer = function()
 	end
 end
 
+function M.parse_buffer()
+	parse_lines(0, -1)
+end
+
+function M.parse_selected()
+	-- get line number and decrease it by one
+	-- because the table is {line, col} and it start at 1
+	local start_pos = vim.api.nvim_buf_get_mark(0, "<")[1] - 1
+	local end_pos = vim.api.nvim_buf_get_mark(0, ">")[1]
+	parse_lines(start_pos, end_pos)
+end
+
 vim.keymap.set("n", "<leader>m", M.parse_buffer, { desc = "emacs compile mode migration" })
+vim.keymap.set("v", "<leader>m", M.parse_selected, { desc = "emacs compile mode migration" })
 
 return M
